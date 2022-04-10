@@ -129,16 +129,16 @@ class LeggedRobotCfg(BaseConfig):
     class rewards:
         class scales:
             termination = -0.0
-            tracking_lin_vel = 1.0
+            tracking_lin_vel = 1.0 
             tracking_ang_vel = 0.5
             lin_vel_z = -2.0
-            ang_vel_xy = -0.05
+            ang_vel_xy = -0.05 #上面四个是线速度和角速度的奖励和约束
             orientation = -0.
-            torques = -0.00001
+            torques = -0.00001 #-0.00001
             dof_vel = -0.
             dof_acc = -2.5e-7
-            base_height = -0. 
-            feet_air_time =  1.0
+            base_height = -1.5 #0  
+            feet_air_time =  1.0 #1.0
             collision = -1.
             feet_stumble = -0.0 
             action_rate = -0.01
@@ -149,7 +149,7 @@ class LeggedRobotCfg(BaseConfig):
         soft_dof_pos_limit = 1. # percentage of urdf limits, values above this limit are penalized
         soft_dof_vel_limit = 1.
         soft_torque_limit = 1.
-        base_height_target = 1.
+        base_height_target = 1.0 #1.0
         max_contact_force = 100. # forces above this value are penalized
 
     class normalization:

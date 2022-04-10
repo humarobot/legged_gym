@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="lion">
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="-0.000638750070817345 -0.00672058356158241 -0.00556735378698432"
+        rpy="0 0 0" />
+      <mass
+        value="3.5014647111828" />
+      <inertia
+        ixx="0.0239995434104132"
+        ixy="-0.000188871621824168"
+        ixz="0.000245468989322163"
+        iyy="0.0553119007901819"
+        iyz="-0.00049300987765597"
+        izz="0.0714019283806637" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://lion/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://lion/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="hip_Link">
+    <inertial>
+      <origin
+        xyz="-0.0050797 -0.047183 4.172E-05"
+        rpy="0 0 0" />
+      <mass
+        value="0.39498" />
+      <inertia
+        ixx="0.00036133"
+        ixy="7.7674E-05"
+        ixz="-5.1665E-07"
+        iyy="0.00053159"
+        iyz="-3.6439E-07"
+        izz="0.00044943" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://lion/meshes/hip_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://lion/meshes/hip_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="abad"
+    type="continuous">
+    <origin
+      xyz="0.2467 -0.09 0.0005"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="hip_Link" />
+    <axis
+      xyz="1 0 0" />
+  </joint>
+  <link
+    name="thigh_Link">
+    <inertial>
+      <origin
+        xyz="-2.7705E-05 -0.089684 -0.23198"
+        rpy="0 0 0" />
+      <mass
+        value="0.66304" />
+      <inertia
+        ixx="0.0061823"
+        ixy="3.3467E-07"
+        ixz="2.1313E-06"
+        iyy="0.0064396"
+        iyz="-0.00019781"
+        izz="0.00049549" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://lion/meshes/thigh_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://lion/meshes/thigh_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="hip"
+    type="continuous">
+    <origin
+      xyz="0 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="hip_Link" />
+    <child
+      link="thigh_Link" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="shank_Link">
+    <inertial>
+      <origin
+        xyz="2.05E-06 -0.12517 -0.080832"
+        rpy="0 0 0" />
+      <mass
+        value="0.072713" />
+      <inertia
+        ixx="0.00052861"
+        ixy="-3.4646E-09"
+        ixz="-2.7153E-09"
+        iyy="0.00053174"
+        iyz="2.8579E-05"
+        izz="1.3053E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://lion/meshes/shank_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://lion/meshes/shank_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="knee"
+    type="continuous">
+    <origin
+      xyz="0 0 -0.3"
+      rpy="0 0 0" />
+    <parent
+      link="thigh_Link" />
+    <child
+      link="shank_Link" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="foot_Link">
+    <inertial>
+      <origin
+        xyz="0.0002617 0.00017365 0.0085579"
+        rpy="0 0 0" />
+      <mass
+        value="0.03946" />
+      <inertia
+        ixx="1.4527E-05"
+        ixy="-8.5021E-08"
+        ixz="-4.0103E-07"
+        iyy="1.4601E-05"
+        iyz="-2.6548E-07"
+        izz="6.2338E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://lion/meshes/foot_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://lion/meshes/foot_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="foot"
+    type="continuous">
+    <origin
+      xyz="0 -0.119 -0.3105"
+      rpy="0 0 0" />
+    <parent
+      link="shank_Link" />
+    <child
+      link="foot_Link" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+</robot>

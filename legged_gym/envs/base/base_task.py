@@ -35,7 +35,7 @@ import numpy as np
 import torch
 
 # Base class for RL tasks
-class BaseTask():
+class BaseTask(): #并不继承自VecEnv，但由于python是若类型的语言，也能实现多态
 
     def __init__(self, cfg, sim_params, physics_engine, sim_device, headless):
         self.gym = gymapi.acquire_gym()
@@ -93,7 +93,7 @@ class BaseTask():
             # subscribe to keyboard shortcuts
             self.viewer = self.gym.create_viewer(
                 self.sim, gymapi.CameraProperties())
-            self.gym.subscribe_viewer_keyboard_event(
+            self.gym.subscribe_viewer_keyboard_event( #绑定键盘输入和触发事件
                 self.viewer, gymapi.KEY_ESCAPE, "QUIT")
             self.gym.subscribe_viewer_keyboard_event(
                 self.viewer, gymapi.KEY_V, "toggle_viewer_sync")
@@ -123,7 +123,7 @@ class BaseTask():
             if self.gym.query_viewer_has_closed(self.viewer):
                 sys.exit()
 
-            # check for keyboard events
+            # check for keyboard events这些动作对应的是什么键盘键位不清楚
             for evt in self.gym.query_viewer_action_events(self.viewer):
                 if evt.action == "QUIT" and evt.value > 0:
                     sys.exit()

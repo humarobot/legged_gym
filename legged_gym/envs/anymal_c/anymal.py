@@ -43,7 +43,7 @@ from legged_gym.envs import LeggedRobot
 from legged_gym import LEGGED_GYM_ROOT_DIR
 from .mixed_terrains.anymal_c_rough_config import AnymalCRoughCfg
 
-class Anymal(LeggedRobot):
+class Anymal(LeggedRobot): #这个会成为env变量
     cfg : AnymalCRoughCfg
     def __init__(self, cfg, sim_params, physics_engine, sim_device, headless):
         super().__init__(cfg, sim_params, physics_engine, sim_device, headless)

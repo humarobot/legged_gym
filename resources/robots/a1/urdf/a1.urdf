@@ -32,19 +32,6 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <box size="0.001 0.001 0.001"/>
-      </geometry>
-    </visual>
-  </link>
-  <joint name="floating_base" type="fixed">
-    <origin rpy="0 0 0" xyz="0 0 0"/>
-    <parent link="base"/>
-    <child link="trunk"/>
-  </joint>
-  <link name="trunk">
-    <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <geometry>
         <mesh filename="../meshes/trunk.dae" scale="1 1 1"/>
       </geometry>
       <material name="orange"/>
@@ -61,34 +48,10 @@
       <inertia ixx="0.01683993" ixy="8.3902e-05" ixz="0.000597679" iyy="0.056579028" iyz="2.5134e-05" izz="0.064713601"/>
     </inertial>
   </link>
-  <joint name="imu_joint" type="fixed">
-    <parent link="trunk"/>
-    <child link="imu_link"/>
-    <origin rpy="0 0 0" xyz="0 0 0"/>
-  </joint>
-  <link name="imu_link">
-    <inertial>
-      <mass value="0.001"/>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
-    </inertial>
-    <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <geometry>
-        <box size="0.001 0.001 0.001"/>
-      </geometry>
-      <material name="red"/>
-    </visual>
-    <!-- <collision>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <geometry>
-        <box size=".001 .001 .001"/>
-      </geometry>
-    </collision> -->
-  </link>
+
   <joint name="FR_hip_joint" type="revolute">
     <origin rpy="0 0 0" xyz="0.183 -0.047 0"/>
-    <parent link="trunk"/>
+    <parent link="base"/>
     <child link="FR_hip"/>
     <axis xyz="1 0 0"/>
     <dynamics damping="0" friction="0"/>
@@ -113,20 +76,6 @@
       <mass value="0.696"/>
       <inertia ixx="0.000469246" ixy="9.409e-06" ixz="-3.42e-07" iyy="0.00080749" iyz="4.66e-07" izz="0.000552929"/>
     </inertial>
-  </link>
-  <joint name="FR_hip_fixed" type="fixed">
-    <origin rpy="0 0 0" xyz="0 -0.081 0"/>
-    <parent link="FR_hip"/>
-    <child link="FR_thigh_shoulder"/>
-  </joint>
-  <!-- this link is only for collision -->
-  <link name="FR_thigh_shoulder">
-    <!-- <collision>
-      <origin rpy="1.57079632679 0 0" xyz="0 0 0"/>
-      <geometry>
-        <cylinder length="0.032" radius="0.041"/>
-      </geometry>
-    </collision> -->
   </link>
   <joint name="FR_thigh_joint" type="revolute">
     <origin rpy="0 0 0" xyz="0 -0.08505 0"/>
@@ -210,7 +159,7 @@
   </link>
   <joint name="FL_hip_joint" type="revolute">
     <origin rpy="0 0 0" xyz="0.183 0.047 0"/>
-    <parent link="trunk"/>
+    <parent link="base"/>
     <child link="FL_hip"/>
     <axis xyz="1 0 0"/>
     <dynamics damping="0" friction="0"/>
@@ -235,20 +184,6 @@
       <mass value="0.696"/>
       <inertia ixx="0.000469246" ixy="-9.409e-06" ixz="-3.42e-07" iyy="0.00080749" iyz="-4.66e-07" izz="0.000552929"/>
     </inertial>
-  </link>
-  <joint name="FL_hip_fixed" type="fixed">
-    <origin rpy="0 0 0" xyz="0 0.081 0"/>
-    <parent link="FL_hip"/>
-    <child link="FL_thigh_shoulder"/>
-  </joint>
-  <!-- this link is only for collision -->
-  <link name="FL_thigh_shoulder">
-    <!-- <collision>
-      <origin rpy="1.57079632679 0 0" xyz="0 0 0"/>
-      <geometry>
-        <cylinder length="0.032" radius="0.041"/>
-      </geometry>
-    </collision> -->
   </link>
   <joint name="FL_thigh_joint" type="revolute">
     <origin rpy="0 0 0" xyz="0 0.08505 0"/>
@@ -332,7 +267,7 @@
   </link>
   <joint name="RR_hip_joint" type="revolute">
     <origin rpy="0 0 0" xyz="-0.183 -0.047 0"/>
-    <parent link="trunk"/>
+    <parent link="base"/>
     <child link="RR_hip"/>
     <axis xyz="1 0 0"/>
     <dynamics damping="0" friction="0"/>
@@ -357,20 +292,6 @@
       <mass value="0.696"/>
       <inertia ixx="0.000469246" ixy="-9.409e-06" ixz="3.42e-07" iyy="0.00080749" iyz="4.66e-07" izz="0.000552929"/>
     </inertial>
-  </link>
-  <joint name="RR_hip_fixed" type="fixed">
-    <origin rpy="0 0 0" xyz="0 -0.081 0"/>
-    <parent link="RR_hip"/>
-    <child link="RR_thigh_shoulder"/>
-  </joint>
-  <!-- this link is only for collision -->
-  <link name="RR_thigh_shoulder">
-    <!-- <collision>
-      <origin rpy="1.57079632679 0 0" xyz="0 0 0"/>
-      <geometry>
-        <cylinder length="0.032" radius="0.041"/>
-      </geometry>
-    </collision> -->
   </link>
   <joint name="RR_thigh_joint" type="revolute">
     <origin rpy="0 0 0" xyz="0 -0.08505 0"/>
@@ -454,7 +375,7 @@
   </link>
   <joint name="RL_hip_joint" type="revolute">
     <origin rpy="0 0 0" xyz="-0.183 0.047 0"/>
-    <parent link="trunk"/>
+    <parent link="base"/>
     <child link="RL_hip"/>
     <axis xyz="1 0 0"/>
     <dynamics damping="0" friction="0"/>
@@ -479,20 +400,6 @@
       <mass value="0.696"/>
       <inertia ixx="0.000469246" ixy="9.409e-06" ixz="3.42e-07" iyy="0.00080749" iyz="-4.66e-07" izz="0.000552929"/>
     </inertial>
-  </link>
-  <joint name="RL_hip_fixed" type="fixed">
-    <origin rpy="0 0 0" xyz="0 0.081 0"/>
-    <parent link="RL_hip"/>
-    <child link="RL_thigh_shoulder"/>
-  </joint>
-  <!-- this link is only for collision -->
-  <link name="RL_thigh_shoulder">
-    <!-- <collision>
-      <origin rpy="1.57079632679 0 0" xyz="0 0 0"/>
-      <geometry>
-        <cylinder length="0.032" radius="0.041"/>
-      </geometry>
-    </collision> -->
   </link>
   <joint name="RL_thigh_joint" type="revolute">
     <origin rpy="0 0 0" xyz="0 0.08505 0"/>

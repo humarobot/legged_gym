@@ -52,7 +52,8 @@ def play(args):
 
     # prepare environment
     env, _ = task_registry.make_env(name=args.task, args=args, env_cfg=env_cfg)
-    obs = env.get_observations()
+    obs = env.get_observations() #BaseTask中的函数
+    #print(obs.shape) #torch.Size([50, 48]) 50个envs,每个观测48个值
     # load policy
     train_cfg.runner.resume = True
     ppo_runner, train_cfg = task_registry.make_alg_runner(env=env, name=args.task, args=args, train_cfg=train_cfg)
@@ -74,7 +75,8 @@ def play(args):
     camera_direction = np.array(env_cfg.viewer.lookat) - np.array(env_cfg.viewer.pos)
     img_idx = 0
 
-    for i in range(10*int(env.max_episode_length)):
+    for i in range(10*int(env.max_episode_length)): #一幕20s，播放10幕结束
+        # obs[:,9:12]=torch.tensor([3,0,1]) #设置期望速度
         actions = policy(obs.detach())
         obs, _, rews, dones, infos = env.step(actions.detach())
         if RECORD_FRAMES:
