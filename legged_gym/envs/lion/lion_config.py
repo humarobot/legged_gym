@@ -46,7 +46,7 @@ class LionFlatCfg( LeggedRobotCfg ):
         measure_heights = False
     class normalization:
         class obs_scales:
-            lin_vel = 1.0
+            lin_vel = .0  #实际上机器人无法获得机身线速度
             ang_vel = 1.0
             dof_pos = 1.0
             dof_vel = 0.05
