@@ -103,12 +103,12 @@ class LeggedRobotCfg(BaseConfig):
         penalize_contacts_on = []
         terminate_after_contacts_on = []
         disable_gravity = False
-        collapse_fixed_joints = True # merge bodies connected by fixed joints. Specific fixed joints can be kept by adding " <... dont_collapse="true">
+        collapse_fixed_joints = False # merge bodies connected by fixed joints. Specific fixed joints can be kept by adding " <... dont_collapse="true">
         fix_base_link = False # fixe the base of the robot
         default_dof_drive_mode = 3 # see GymDofDriveModeFlags (0 is none, 1 is pos tgt, 2 is vel tgt, 3 effort)
         self_collisions = 0 # 1 to disable, 0 to enable...bitwise filter
         replace_cylinder_with_capsule = True # replace collision cylinders with capsules, leads to faster/more stable simulation
-        flip_visual_attachments = True # Some .obj meshes must be flipped from y-up to z-up
+        flip_visual_attachments = False # Some .obj meshes must be flipped from y-up to z-up
         
         density = 0.001
         angular_damping = 0.
@@ -121,7 +121,7 @@ class LeggedRobotCfg(BaseConfig):
     class domain_rand:
         randomize_friction = True
         friction_range = [0.5, 1.25]
-        randomize_base_mass = False
+        randomize_base_mass = True
         added_mass_range = [-1., 1.]
         push_robots = True
         push_interval_s = 15
@@ -134,23 +134,23 @@ class LeggedRobotCfg(BaseConfig):
             tracking_ang_vel = 0.5
             lin_vel_z = -2.0
             ang_vel_xy = -0.05 #上面四个是线速度和角速度的奖励和约束
-            orientation = -0.
+            orientation = -6.
             torques = -0.00001 #-0.00001
-            dof_vel = -0.
+            dof_vel = -0.2
             dof_acc = -2.5e-7
-            base_height = -1.5 #0  
-            feet_air_time =  1.0 #1.0
+            base_height = -0 #0  
+            feet_air_time =  0.0 #1.0
             collision = -1.
             feet_stumble = -0.0 
             action_rate = -0.01
             stand_still = -0.
 
-        only_positive_rewards = True # if true negative total rewards are clipped at zero (avoids early termination problems)
+        only_positive_rewards = False  # if true negative total rewards are clipped at zero (avoids early termination problems)
         tracking_sigma = 0.25 # tracking reward = exp(-error^2/sigma)
         soft_dof_pos_limit = 1. # percentage of urdf limits, values above this limit are penalized
         soft_dof_vel_limit = 1.
         soft_torque_limit = 1.
-        base_height_target = 1.0 #1.0
+        base_height_target = 0.55 #1.0
         max_contact_force = 100. # forces above this value are penalized
 
     class normalization:

@@ -28,27 +28,30 @@
 #
 # Copyright (c) 2021 ETH Zurich, Nikita Rudin
 
-from legged_gym import LEGGED_GYM_ROOT_DIR, LEGGED_GYM_ENVS_DIR
-from legged_gym.envs.a1.a1_config import A1RoughCfg, A1RoughCfgPPO
-from .base.legged_robot import LeggedRobot
-from .anymal_c.anymal import Anymal
-from .anymal_c.mixed_terrains.anymal_c_rough_config import AnymalCRoughCfg, AnymalCRoughCfgPPO
-from .anymal_c.flat.anymal_c_flat_config import AnymalCFlatCfg, AnymalCFlatCfgPPO
-from .anymal_b.anymal_b_config import AnymalBRoughCfg, AnymalBRoughCfgPPO
-from .cassie.cassie import Cassie
-from .cassie.cassie_config import CassieRoughCfg, CassieRoughCfgPPO
-from .a1.a1_config import A1RoughCfg, A1RoughCfgPPO
-from .lion.lion_config import LionFlatCfgPPO,LionFlatCfg
-from .lion.lion import Lion
-
-
+from time import time
+import numpy as np
 import os
 
-from legged_gym.utils.task_registry import task_registry
+from isaacgym.torch_utils import *
+from isaacgym import gymtorch, gymapi, gymutil
 
-task_registry.register( "anymal_c_rough", Anymal, AnymalCRoughCfg(), AnymalCRoughCfgPPO() )
-task_registry.register( "anymal_c_flat", Anymal, AnymalCFlatCfg(), AnymalCFlatCfgPPO() )
-task_registry.register( "anymal_b", Anymal, AnymalBRoughCfg(), AnymalBRoughCfgPPO() )
-task_registry.register( "lion", Lion, LionFlatCfg(), LionFlatCfgPPO() )
-task_registry.register( "a1", LeggedRobot, A1RoughCfg(), A1RoughCfgPPO() )
-task_registry.register( "cassie", Cassie, CassieRoughCfg(), CassieRoughCfgPPO() )
+import torch
+# from torch.tensor import Tensor
+from typing import Tuple, Dict
+
+from legged_gym.envs import LeggedRobot
+from legged_gym import LEGGED_GYM_ROOT_DIR
+from .lion_config import LionFlatCfg
+
+class Lion(LeggedRobot): #这个会成为env变量
+    cfg : LionFlatCfg
+    def __init__(self, cfg, sim_params, physics_engine, sim_device, headless):
+        super().__init__(cfg, sim_params, physics_engine, sim_device, headless)
+        _names=self.gym.get_actor_joint_names(self.envs[0],self.actor_handles[0])
+        print(_names)
+        for name in _names:
+            print(name)
+            # print(self.gym.find_actor_joint_index(self.envs[0],self.actor_handles[0],name))
+
+
+      

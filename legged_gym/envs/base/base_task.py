@@ -123,7 +123,7 @@ class BaseTask(): #并不继承自VecEnv，但由于python是若类型的语言�
             if self.gym.query_viewer_has_closed(self.viewer):
                 sys.exit()
 
-            # check for keyboard events这些动作对应的是什么键盘键位不清楚
+            # check for keyboard events这些动作对应的是什么键盘键位用户手动设置
             for evt in self.gym.query_viewer_action_events(self.viewer):
                 if evt.action == "QUIT" and evt.value > 0:
                     sys.exit()
@@ -134,6 +134,8 @@ class BaseTask(): #并不继承自VecEnv，但由于python是若类型的语言�
             if self.device != 'cpu':
                 self.gym.fetch_results(self.sim, True)
 
+            
+
             # step graphics
             if self.enable_viewer_sync:
                 self.gym.step_graphics(self.sim)
@@ -142,3 +144,5 @@ class BaseTask(): #并不继承自VecEnv，但由于python是若类型的语言�
                     self.gym.sync_frame_time(self.sim)
             else:
                 self.gym.poll_viewer_events(self.viewer)
+
+            

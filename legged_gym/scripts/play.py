@@ -76,9 +76,12 @@ def play(args):
     img_idx = 0
 
     for i in range(10*int(env.max_episode_length)): #一幕20s，播放10幕结束
-        # obs[:,9:12]=torch.tensor([3,0,1]) #设置期望速度
-        actions = policy(obs.detach())
+        obs[:,9:12]=torch.tensor([.5,0,0.2]) #设置期望速度
+        # print(obs[1])
+        actions=policy(obs.detach())
         obs, _, rews, dones, infos = env.step(actions.detach())
+        # print(actions[1])
+        
         if RECORD_FRAMES:
             if i % 2:
                 filename = os.path.join(LEGGED_GYM_ROOT_DIR, 'logs', train_cfg.runner.experiment_name, 'exported', 'frames', f"{img_idx}.png")
