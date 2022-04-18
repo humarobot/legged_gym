@@ -74,7 +74,7 @@ class LionFlatCfg( LeggedRobotCfg ):
 
     class rewards:
         class scales:   
-            tracking_lin_vel = 1.0 
+            tracking_lin_vel = .1 
             tracking_ang_vel = 0.5
             lin_vel_z = -2.0
             ang_vel_xy = -0.05 #上面四个是线速度和角速度的奖励和约束
@@ -114,7 +114,7 @@ class LionFlatCfgPPO( LeggedRobotCfgPPO ):
         save_interval = 50 # check for potential saves every this many iterations
         run_name = ''
         # load and resume
-        resume = False
+        resume = True
         load_run = -1 # -1 = last run
         checkpoint = -1 # -1 = last saved model
         resume_path = None # updated from load_run and chkpt

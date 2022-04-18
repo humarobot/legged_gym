@@ -96,7 +96,7 @@ def parse_sim_params(args, cfg):
 
     # Override num_threads if passed on the command line
     if args.physics_engine == gymapi.SIM_PHYSX and args.num_threads > 0:
-        sim_params.physx.num_threads = args.num_threads
+        load_run.physx.num_threads = args.num_threads
 
     return sim_params
 
