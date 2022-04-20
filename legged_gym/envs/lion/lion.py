@@ -49,9 +49,15 @@ class Lion(LeggedRobot): #这个会成为env变量
         super().__init__(cfg, sim_params, physics_engine, sim_device, headless)
         _names=self.gym.get_actor_joint_names(self.envs[0],self.actor_handles[0])
         print(_names)
+        self.num_states= cfg.env.num_states
         for name in _names:
             print(name)
             # print(self.gym.find_actor_joint_index(self.envs[0],self.actor_handles[0],name))
 
+    def estimate_velocity(self):
+        pass
+
+    def get_body_velocity(self):
+        return self.base_lin_vel
 
       

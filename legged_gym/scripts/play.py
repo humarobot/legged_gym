@@ -37,6 +37,7 @@ from legged_gym.utils import  get_args, export_policy_as_jit, task_registry, Log
 
 import numpy as np
 import torch
+import torch.nn as nn
 
 
 def play(args):
@@ -58,6 +59,12 @@ def play(args):
     train_cfg.runner.resume = True
     ppo_runner, train_cfg = task_registry.make_alg_runner(env=env, name=args.task, args=args, train_cfg=train_cfg)
     policy = ppo_runner.get_inference_policy(device=env.device)
+    estimator = ppo_runner.get_inference_estimator(device=env.device)
+    # for p in ppo_runner.alg.vel_estimator.parameters():
+    #     print(p) 
+    input_e = torch.cat((obs[:,3:9],obs[:,12:]),dim=-1)
+    vel = estimator(input_e)
+    obs = torch.cat((vel,obs[:,3:]),dim=-1)
     
     # export policy as a jit module (used to run it from C++)
     if EXPORT_POLICY:
@@ -74,12 +81,19 @@ def play(args):
     camera_vel = np.array([1., 1., 0.])
     camera_direction = np.array(env_cfg.viewer.lookat) - np.array(env_cfg.viewer.pos)
     img_idx = 0
-
+    loss_fn=nn.MSELoss()
+    
     for i in range(10*int(env.max_episode_length)): #一幕20s，播放10幕结束
-        obs[:,9:12]=torch.tensor([.5,0,0.2]) #设置期望速度
-        # print(obs[1])
+        obs[:,9:12]=torch.tensor([.5,0,0.]) #设置期望速度
+        print(obs[1,:3])
         actions=policy(obs.detach())
         obs, _, rews, dones, infos = env.step(actions.detach())
+        input_e = torch.cat((obs[:,3:9],obs[:,12:]),dim=-1)
+        vel = estimator(input_e).detach()
+        # mean_loss=loss_fn(vel,obs[:,:3]).item()
+        # print(mean_loss)
+        obs = torch.cat((vel,obs[:,3:]),dim=-1)
+        # print(vel[1])
         # print(actions[1])
         
         if RECORD_FRAMES:

@@ -79,3 +79,6 @@ class Anymal(LeggedRobot): #这个会成为env变量
         else:
             # pd controller
             return super()._compute_torques(actions)    
+
+    def get_body_velocity(self):
+        return self.base_lin_vel

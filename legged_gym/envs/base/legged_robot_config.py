@@ -72,8 +72,8 @@ class LeggedRobotCfg(BaseConfig):
         resampling_time = 10. # time before command are changed[s]
         heading_command = True # if true: compute ang vel command from heading error
         class ranges:
-            lin_vel_x = [-1.0, 1.0] # min max [m/s]
-            lin_vel_y = [-1.0, 1.0]   # min max [m/s]
+            lin_vel_x = [-2.0, 2.0] # min max [m/s]
+            lin_vel_y = [-2.0, 2.0]   # min max [m/s]
             ang_vel_yaw = [-1, 1]    # min max [rad/s]
             heading = [-3.14, 3.14]
 
@@ -134,9 +134,9 @@ class LeggedRobotCfg(BaseConfig):
             tracking_ang_vel = 0.5
             lin_vel_z = -2.0
             ang_vel_xy = -0.05 #上面四个是线速度和角速度的奖励和约束
-            orientation = -6.
+            orientation = -0.
             torques = -0.00001 #-0.00001
-            dof_vel = -0.2
+            dof_vel = -0.
             dof_acc = -2.5e-7
             base_height = -0 #0  
             feet_air_time =  0.0 #1.0
@@ -145,12 +145,12 @@ class LeggedRobotCfg(BaseConfig):
             action_rate = -0.01
             stand_still = -0.
 
-        only_positive_rewards = False  # if true negative total rewards are clipped at zero (avoids early termination problems)
+        only_positive_rewards = True  # if true negative total rewards are clipped at zero (avoids early termination problems)
         tracking_sigma = 0.25 # tracking reward = exp(-error^2/sigma)
         soft_dof_pos_limit = 1. # percentage of urdf limits, values above this limit are penalized
         soft_dof_vel_limit = 1.
         soft_torque_limit = 1.
-        base_height_target = 0.55 #1.0
+        base_height_target = 1.0 #1.0
         max_contact_force = 100. # forces above this value are penalized
 
     class normalization:

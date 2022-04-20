@@ -34,20 +34,21 @@ class LionFlatCfg( LeggedRobotCfg ):
         file = '{LEGGED_GYM_ROOT_DIR}/resources/robots/lion/urdf/lion.urdf'
         foot_name = "foot"
         penalize_contacts_on = ["thigh", "shank","body"]
-        terminate_after_contacts_on = ["shank"]
-        self_collisions = 1 # 1 to disable, 0 to enable...bitwise filter
+        terminate_after_contacts_on = ["thigh"]
+        self_collisions = 0 # 1 to disable, 0 to enable...bitwise filter
   
 
     class env( LeggedRobotCfg.env ):
-        num_observations = 48
+        num_observations = 48 
+        num_states = 48
 
     class terrain( LeggedRobotCfg.terrain ):
         mesh_type = 'plane'
         measure_heights = False
     class normalization:
         class obs_scales:
-            lin_vel = .0  #实际上机器人无法获得机身线速度
-            ang_vel = 1.0
+            lin_vel = 2.0  #实际上机器人无法获得机身线速度
+            ang_vel = .25
             dof_pos = 1.0
             dof_vel = 0.05
             height_measurements = 5.0
@@ -74,12 +75,12 @@ class LionFlatCfg( LeggedRobotCfg ):
 
     class rewards:
         class scales:   
-            tracking_lin_vel = .1 
+            tracking_lin_vel = 1.0 
             tracking_ang_vel = 0.5
             lin_vel_z = -2.0
             ang_vel_xy = -0.05 #上面四个是线速度和角速度的奖励和约束
             termination = -0.0
-            orientation = -10.
+            orientation = -6.
             base_height = -3
             torques = -0.00001 #-0.00001
             feet_air_time = 1.0
@@ -89,7 +90,7 @@ class LionFlatCfg( LeggedRobotCfg ):
             collision=-5 #指定的零件发生碰撞就惩罚
             # stand_up = -5
             smoothness = -0.0025
-            dof_pos_limits = -10.0
+            # dof_pos_limits = -10.0
             # internal_contacts = -6 #暂时没有好的方法做内部碰撞检测
 
         only_positive_rewards = False  # if true negative total rewards are clipped at zero (avoids early termination problems)
@@ -97,7 +98,7 @@ class LionFlatCfg( LeggedRobotCfg ):
         soft_dof_pos_limit = 1. # percentage of urdf limits, values above this limit are penalized
         soft_dof_vel_limit = 1.
         soft_torque_limit = 1.
-        base_height_target = 0.55 #1.0
+        base_height_target = 0.6 #1.0
         max_contact_force = 100. # forces above this value are penalized
 
 class LionFlatCfgPPO( LeggedRobotCfgPPO ):
