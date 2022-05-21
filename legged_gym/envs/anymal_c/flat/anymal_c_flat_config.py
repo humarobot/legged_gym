@@ -32,7 +32,7 @@ from legged_gym.envs import AnymalCRoughCfg, AnymalCRoughCfgPPO
 
 class AnymalCFlatCfg( AnymalCRoughCfg ):
     class env( AnymalCRoughCfg.env ):
-        num_observations = 48
+        num_observations = 49  #增加启动的时间观测
   
     class terrain( AnymalCRoughCfg.terrain ):
         mesh_type = 'plane'
@@ -43,17 +43,36 @@ class AnymalCFlatCfg( AnymalCRoughCfg ):
 
     class rewards( AnymalCRoughCfg.rewards ):
         max_contact_force = 350.
+        base_height_target = 0.5
+        only_positive_rewards = False
         class scales ( AnymalCRoughCfg.rewards.scales ):
-            orientation = -5.0
-            torques = -0.000025
-            feet_air_time = 2.
-            # feet_contact_forces = -0.01
+            termination = -0.0
+            lin_vel_z = 0.0
+            ang_vel_xy = 0.0
+            orientation = -5.
+            torques = -0.0
+            dof_vel = -0.
+            dof_acc = -0.
+            base_height = -2. 
+            feet_air_time =  0.0
+            collision = -1.
+            feet_stumble = -0.0 
+            action_rate = -0.01
+            stand_still = -0.
+            torques = -0.0
+            tracking_lin_vel = 1.0
+            tracking_ang_vel = 0.5
+            # tracking_height = -1.0
+            walk_gait = -1
+            # # feet_contact_forces = -0.01
     
     class commands( AnymalCRoughCfg.commands ):
         heading_command = False
         resampling_time = 4.
         class ranges( AnymalCRoughCfg.commands.ranges ):
-            ang_vel_yaw = [-1.5, 1.5]
+            lin_vel_x = [-.5, .5] # min max [m/s]
+            lin_vel_y = [-.3, .3]   # min max [m/s]
+            ang_vel_yaw = [-.3, .3]
 
     class domain_rand( AnymalCRoughCfg.domain_rand ):
         friction_range = [0., 1.5] # on ground planes the friction combination mode is averaging, i.e total friction = (foot_friction + 1.)/2.
@@ -72,3 +91,4 @@ class AnymalCFlatCfgPPO( AnymalCRoughCfgPPO ):
         experiment_name = 'flat_anymal_c'
         load_run = -1
         max_iterations = 300
+        resume = True

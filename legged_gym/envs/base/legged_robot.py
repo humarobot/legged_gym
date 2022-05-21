@@ -28,11 +28,13 @@
 #
 # Copyright (c) 2021 ETH Zurich, Nikita Rudin
 
+from this import d
 from legged_gym import LEGGED_GYM_ROOT_DIR, envs
 from time import time
 from warnings import WarningMessage
 import numpy as np
 import os
+from torch.distributions import Normal
 
 from isaacgym.torch_utils import *
 from isaacgym import gymtorch, gymapi, gymutil
@@ -109,6 +111,7 @@ class LeggedRobot(BaseTask):
         """
         self.gym.refresh_actor_root_state_tensor(self.sim)
         self.gym.refresh_net_contact_force_tensor(self.sim)
+        self.gym.refresh_rigid_body_state_tensor(self.sim)
 
         self.episode_length_buf += 1
         self.common_step_counter += 1
@@ -126,6 +129,7 @@ class LeggedRobot(BaseTask):
         self.compute_reward()
         env_ids = self.reset_buf.nonzero(as_tuple=False).flatten()
         self.reset_idx(env_ids)
+        self._update_envs_time(2.0)
         self.compute_observations() # in some cases a simulation step might be required to refresh some obs (for example body positions)
 
         self.last_actions[:] = self.actions[:]
@@ -141,6 +145,7 @@ class LeggedRobot(BaseTask):
         self.reset_buf = torch.any(torch.norm(self.contact_forces[:, self.termination_contact_indices, :], dim=-1) > 1., dim=1)
         self.time_out_buf = self.episode_length_buf > self.max_episode_length # no terminal reward for time-outs
         self.reset_buf |= self.time_out_buf
+        # self.reset_buf=self.time_out_buf
 
     def reset_idx(self, env_ids):
         """ Reset some environments.
@@ -215,7 +220,8 @@ class LeggedRobot(BaseTask):
                                     self.commands[:, :3] * self.commands_scale,
                                     (self.dof_pos - self.default_dof_pos) * self.obs_scales.dof_pos,
                                     self.dof_vel * self.obs_scales.dof_vel,
-                                    self.actions
+                                    self.actions,
+                                    self.running_phase.unsqueeze(1)
                                     ),dim=-1)
         # add perceptive inputs if not blind
         if self.cfg.terrain.measure_heights:
@@ -485,23 +491,31 @@ class LeggedRobot(BaseTask):
         actor_root_state = self.gym.acquire_actor_root_state_tensor(self.sim)
         dof_state_tensor = self.gym.acquire_dof_state_tensor(self.sim)
         net_contact_forces = self.gym.acquire_net_contact_force_tensor(self.sim)
+        _rb_states = self.gym.acquire_rigid_body_state_tensor(self.sim)
         self.gym.refresh_dof_state_tensor(self.sim)
         self.gym.refresh_actor_root_state_tensor(self.sim)
         self.gym.refresh_net_contact_force_tensor(self.sim)
+        self.gym.refresh_rigid_body_state_tensor(self.sim)
 
         # create some wrapper tensors for different slices
+        self.rb_states = gymtorch.wrap_tensor(_rb_states)
         self.root_states = gymtorch.wrap_tensor(actor_root_state)
         self.dof_state = gymtorch.wrap_tensor(dof_state_tensor)
         self.dof_pos = self.dof_state.view(self.num_envs, self.num_dof, 2)[..., 0]
         self.dof_vel = self.dof_state.view(self.num_envs, self.num_dof, 2)[..., 1]
         self.base_quat = self.root_states[:, 3:7]
+        self.feet_height = self.rb_states.view(self.num_envs,self.num_bodies,13)[:,self.feet_indices,2]
 
         self.contact_forces = gymtorch.wrap_tensor(net_contact_forces).view(self.num_envs, -1, 3) # shape: num_envs, num_bodies, xyz axis
 
         # initialize some data used later on
         self.common_step_counter = 0
+        self.running_time = torch.zeros(self.num_envs,dtype=torch.float, device=self.device, requires_grad=False)
+        self.running_phase = torch.zeros(self.num_envs,dtype=torch.float, device=self.device, requires_grad=False)
+        # self.feet_height = torch.zeros(self.num_envs,4,dtype=torch.float, device=self.device, requires_grad=False)
         self.extras = {}
         self.noise_scale_vec = self._get_noise_scale_vec(self.cfg)
+        self.expected_contact = torch.zeros(self.num_envs,4,dtype=torch.float, device=self.device, requires_grad=False)
         self.gravity_vec = to_torch(get_axis_params(-1., self.up_axis_idx), device=self.device).repeat((self.num_envs, 1))
         self.forward_vec = to_torch([1., 0., 0.], device=self.device).repeat((self.num_envs, 1))
         self.torques = torch.zeros(self.num_envs, self.num_actions, dtype=torch.float, device=self.device, requires_grad=False)
@@ -812,6 +826,13 @@ class LeggedRobot(BaseTask):
 
         return heights.view(self.num_envs, -1) * self.terrain.cfg.vertical_scale
 
+    def _update_envs_time(self,period):
+        self.running_time += self.dt
+        self.running_time *= ~self.reset_buf
+        self.running_phase = self.running_time/period-(self.running_time/period).floor()
+        # print(self.running_phase[0])
+
+
     #------------ reward functions----------------
     def _reward_lin_vel_z(self):
         # Penalize z axis base linear velocity
@@ -904,3 +925,117 @@ class LeggedRobot(BaseTask):
     def _reward_feet_contact_forces(self):
         # penalize high contact forces
         return torch.sum((torch.norm(self.contact_forces[:, self.feet_indices, :], dim=-1) -  self.cfg.rewards.max_contact_force).clip(min=0.), dim=1)
+
+    def _reward_tracking_height(self):
+        # Penalize base height away from target
+        base_height = torch.mean(self.root_states[:, 2].unsqueeze(1) - self.measured_heights, dim=1)
+        desired_height=0.1*torch.sin(2*3.14159*self.running_phase)+0.5
+        # print(desired_height[0])
+        return torch.square(base_height - desired_height)
+    
+    def _reward_walk_gait(self):
+        self.feet_height = self.rb_states.view(self.num_envs,self.num_bodies,13)[:,self.feet_indices,2]
+        first_phase=torch.logical_and(self.running_phase>0,self.running_phase<=0.25)
+        second_phase=torch.logical_and(self.running_phase>0.25,self.running_phase<=0.5)
+        third_phase=torch.logical_and(self.running_phase>0.5,self.running_phase<=0.75)
+        forth_phase=torch.logical_and(self.running_phase>0.75,self.running_phase<=1)
+        fl_haa_expected=first_phase*.0
+        fl_hfe_expected=0.4+torch.mul(0.3*torch.sin(4*3.14159*self.running_phase),first_phase)
+        fl_kfe_expected=-0.8-torch.mul(0.6*torch.sin(4*3.14159*self.running_phase),first_phase)
+        fl_dof_pos_exp=torch.cat((fl_haa_expected.unsqueeze(1),fl_hfe_expected.unsqueeze(1),fl_kfe_expected.unsqueeze(1)),dim=-1)
+        hr_haa_expected=second_phase*.0
+        hr_hfe_expected=-0.4-torch.mul(0.3*torch.sin(4*3.14159*(self.running_phase-0.25)),second_phase)
+        hr_kfe_expected=0.8+torch.mul(0.6*torch.sin(4*3.14159*(self.running_phase-0.25)),second_phase)
+        hr_dof_pos_exp=torch.cat((hr_haa_expected.unsqueeze(1),hr_hfe_expected.unsqueeze(1),hr_kfe_expected.unsqueeze(1)),dim=-1)
+        fr_haa_expected=third_phase*.0
+        fr_hfe_expected=0.4+torch.mul(0.3*torch.sin(4*3.14159*(self.running_phase-0.5)),third_phase)
+        fr_kfe_expected=-0.8-torch.mul(0.6*torch.sin(4*3.14159*(self.running_phase-0.5)),third_phase)
+        fr_dof_pos_exp=torch.cat((fr_haa_expected.unsqueeze(1),fr_hfe_expected.unsqueeze(1),fr_kfe_expected.unsqueeze(1)),dim=-1)
+        hl_haa_expected=forth_phase*.0
+        hl_hfe_expected=-0.4-torch.mul(0.3*torch.sin(4*3.14159*(self.running_phase-0.75)),forth_phase)
+        hl_kfe_expected=0.8+torch.mul(0.6*torch.sin(4*3.14159*(self.running_phase-0.75)),forth_phase)
+        hl_dof_pos_exp=torch.cat((hl_haa_expected.unsqueeze(1),hl_hfe_expected.unsqueeze(1),hl_kfe_expected.unsqueeze(1)),dim=-1)
+        
+        # print(fl_dof_pos_exp[0])
+        # print(self.dof_pos[:,0:3][0])
+        # print(self.default_dof_pos[0])
+        # rw_others=torch.sum((self.dof_pos[:,0:3] - self.default_dof_pos[:,0:3]).square(),dim=1)
+        # rw_others+=torch.sum((self.dof_pos[:,6:] - self.default_dof_pos[:,6:]).square(),dim=1)
+        rw_fl=torch.sum((self.dof_pos[:,0:3]-fl_dof_pos_exp).square(),dim=1)
+        rw_hr=torch.sum((self.dof_pos[:,9:12]-hr_dof_pos_exp).square(),dim=1)
+        rw_fr=torch.sum((self.dof_pos[:,6:9]-fr_dof_pos_exp).square(),dim=1)
+        rw_hl=torch.sum((self.dof_pos[:,3:6]-hl_dof_pos_exp).square(),dim=1)
+        return rw_fl+rw_hr+rw_fr+rw_hl
+        # return rw_fl+rw_hr+rw_fr+rw_hl
+        # fl_expected_height=torch.mul(torch.sin(4*3.14159*self.running_phase)*0.2,first_phase)
+        # hr_expected_height=torch.mul(torch.sin(4*3.14159*(self.running_phase-0.25))*0.2,second_phase)
+        # fr_expected_height=torch.mul(torch.sin(4*3.14159*(self.running_phase-0.5))*0.2,third_phase)
+        # hl_expected_height=torch.mul(torch.sin(4*3.14159*(self.running_phase-0.75))*0.2,forth_phase)
+        # expected_height=torch.cat((fl_expected_height.view(self.num_envs,1),\
+        #     fr_expected_height.view(self.num_envs,1),hl_expected_height.view(self.num_envs,1),\
+        #     hr_expected_height.view(self.num_envs,1)),dim=-1)
+        # print(expected_height[0],self.feet_height[0])
+        # rw_walk = torch.exp(-100*torch.sum((self.feet_height-expected_height).square(),dim=1))
+        # rw_walk=torch.sum((self.feet_height-expected_height).square(),dim=1)
+        # return rw_walk
+
+    # def _reward_walk_gait(self):
+    #     #walk的步序应该是1，4，2，3
+    #     self.feet_height = self.rb_states.view(self.num_envs,self.num_bodies,13)[:,self.feet_indices,2]
+    #     feet_vel_abs = 30.*self.rb_states.view(self.num_envs,self.num_bodies,13)[:,self.feet_indices,9].square()
+    #     contact = self.contact_forces[:, self.feet_indices, 2] > 1.
+    #     contact_filt = torch.logical_or(contact, self.last_contacts) 
+    #     self.last_contacts = contact
+    #     self.running_time *= ~self.reset_buf
+    #     self.running_time += self.dt
+    #     scaled_running_time = self.running_time*0.5
+    #     self.expected_contact *=0
+    #     self.phase = scaled_running_time - scaled_running_time.floor()
+    #     first_phase=torch.logical_and(self.phase>0,self.phase<=0.5)
+    #     second_phase=torch.logical_and(self.phase>0.5,self.phase<=1)
+    #     # third_phase=torch.logical_and(self.phase>0.5,self.phase<=0.75)
+    #     # forth_phase=torch.logical_and(self.phase>0.75,self.phase<=1)
+    #     vel_enable=torch.cat((first_phase.view(self.num_envs,1),second_phase.view(self.num_envs,1),\
+    #         first_phase.view(self.num_envs,1),second_phase.view(self.num_envs,1)),dim=-1)
+    #     stance_enable=~vel_enable
+    #     l_expected_height=torch.mul(torch.sin(2*3.14159*self.phase)*0.1,first_phase)
+    #     r_expected_height=torch.mul(torch.sin(2*3.14159*(self.phase-0.5))*0.1,second_phase)
+    #     expected_height=torch.cat((l_expected_height.view(self.num_envs,1),\
+    #         r_expected_height.view(self.num_envs,1),l_expected_height.view(self.num_envs,1),\
+    #         r_expected_height.view(self.num_envs,1)),dim=-1)
+
+    #     # rw_height = torch.exp(-100*torch.sum((self.feet_height-expected_height).square(),dim=1))
+    #     rw_stance=torch.sum(torch.mul(stance_enable,self.contact_forces[:, self.feet_indices, 2]),dim=1) 
+    #     rw_vel=torch.sum(torch.mul(vel_enable,feet_vel_abs),dim=1) 
+    #     pn_stance=torch.sum(torch.mul(vel_enable,self.contact_forces[:, self.feet_indices, 2]),dim=1)
+    #     pn_vel=torch.sum(torch.mul(stance_enable,feet_vel_abs),dim=1) 
+    #     # rw_vel_clip=torch.reciprocal(1+torch.exp(-(rw_vel)))-0.5
+    #     # rw_stance_clip=torch.reciprocal(1+torch.exp(-rw_stance/100))-0.5
+    #     # pn_vel_clip=torch.reciprocal(1+torch.exp(pn_vel))-0.5
+    #     # pn_stance_clip=torch.reciprocal(1+torch.exp(pn_stance/100))-0.5
+    #     return (rw_vel_clip+rw_stance_clip-pn_vel_clip-pn_stance_clip)
+        # fl_expected_height=torch.mul(torch.sin(4*3.14159*self.phase)*0.1,first_phase)
+        # hr_expected_height=torch.mul(torch.sin(4*3.14159*(self.phase-0.25))*0.1,second_phase)
+        # fr_expected_height=torch.mul(torch.sin(4*3.14159*(self.phase-0.5))*0.1,third_phase)
+        # hl_expected_height=torch.mul(torch.sin(4*3.14159*(self.phase-0.75))*0.1,forth_phase)
+        # expected_height=torch.cat((fl_expected_height.view(self.num_envs,1),\
+        #     fr_expected_height.view(self.num_envs,1),hl_expected_height.view(self.num_envs,1),\
+        #     hr_expected_height.view(self.num_envs,1)),dim=-1)
+
+        # print(expected_height[1])
+        # print(self.feet_height[1])
+        # first_phase_idx=first_phase.nonzero()
+        # second_phase_idx=second_phase.nonzero()
+        # third_phase_idx=third_phase.nonzero()
+        # forth_phase_idx=forth_phase.nonzero()
+
+        # self.expected_contact[first_phase_idx,0]=1
+        # self.expected_contact[second_phase_idx,1]=1
+        # self.expected_contact[third_phase_idx,2]=1
+        # self.expected_contact[forth_phase_idx,3]=1
+    
+        # samp_contact = Normal(self.expected_contact,self.expected_contact*.0+0.2).sample()
+        # contact_float = (~contact_filt).float()
+        # rew_walk = torch.exp(-100*torch.sum((self.feet_height-expected_height).square(),dim=1)) 
+        # rew_walk = (rew_walk-0.1)*0.6
+        # return rew_walk
