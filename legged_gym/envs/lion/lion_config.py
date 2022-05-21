@@ -32,9 +32,9 @@ class LionFlatCfg( LeggedRobotCfg ):
 
     class asset( LeggedRobotCfg.asset ):
         file = '{LEGGED_GYM_ROOT_DIR}/resources/robots/lion/urdf/lion.urdf'
-        foot_name = "foot"
-        penalize_contacts_on = ["thigh", "shank","body"]
-        terminate_after_contacts_on = ["shank"]
+        foot_name = "shank"
+        penalize_contacts_on = ["thigh","body"]
+        terminate_after_contacts_on = ["thigh"]
         self_collisions = 1 # 1 to disable, 0 to enable...bitwise filter
   
 
@@ -82,7 +82,7 @@ class LionFlatCfg( LeggedRobotCfg ):
             orientation = -10.
             base_height = -3
             torques = -0.00001 #-0.00001
-            feet_air_time = 1.0
+            feet_air_time = 2.0
             # dof_vel = -0.2
             dof_acc = -2.5e-7
             action_rate = -0.01
