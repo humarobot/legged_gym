@@ -23,7 +23,7 @@ class LionFlatCfg( LeggedRobotCfg ):
     class control( LeggedRobotCfg.control ):
         # PD Drive parameters:
         control_type = 'P'
-        stiffness = {'Joint': 20.}  # [N*m/rad]
+        stiffness = {'Joint': 25.}  # [N*m/rad]
         damping = {'Joint': 0.5}     # [N*m*s/rad]
         # action scale: target angle = actionScale * action + defaultAngle
         action_scale = 0.25
@@ -33,7 +33,7 @@ class LionFlatCfg( LeggedRobotCfg ):
     class asset( LeggedRobotCfg.asset ):
         file = '{LEGGED_GYM_ROOT_DIR}/resources/robots/lion/urdf/lion.urdf'
         foot_name = "shank"
-        penalize_contacts_on = ["thigh","body"]
+        penalize_contacts_on = ["thigh","hip","body"]
         terminate_after_contacts_on = ["thigh"]
         self_collisions = 1 # 1 to disable, 0 to enable...bitwise filter
   
@@ -79,10 +79,10 @@ class LionFlatCfg( LeggedRobotCfg ):
             lin_vel_z = -2.0
             ang_vel_xy = -0.05 #上面四个是线速度和角速度的奖励和约束
             termination = -0.0
-            orientation = -10.
+            orientation = -5.
             base_height = -3
             torques = -0.00001 #-0.00001
-            feet_air_time = 2.0
+            feet_air_time = 1.0
             # dof_vel = -0.2
             dof_acc = -2.5e-7
             action_rate = -0.01
@@ -97,7 +97,7 @@ class LionFlatCfg( LeggedRobotCfg ):
         soft_dof_pos_limit = 1. # percentage of urdf limits, values above this limit are penalized
         soft_dof_vel_limit = 1.
         soft_torque_limit = 1.
-        base_height_target = 0.55 #1.0
+        base_height_target = 0.5 #1.0
         max_contact_force = 100. # forces above this value are penalized
 
 class LionFlatCfgPPO( LeggedRobotCfgPPO ):
@@ -119,7 +119,7 @@ class LionFlatCfgPPO( LeggedRobotCfgPPO ):
         checkpoint = -1 # -1 = last saved model
         resume_path = None # updated from load_run and chkpt
     class policy:
-        init_noise_std = 1.0
+        init_noise_std = 2.0
         # actor_hidden_dims = [512,256,128]
         # critic_hidden_dims = [512,256,128]
         actor_hidden_dims = [256,128,64]
