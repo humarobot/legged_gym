@@ -39,7 +39,7 @@ class LionFlatCfg( LeggedRobotCfg ):
   
 
     class env( LeggedRobotCfg.env ):
-        num_observations = 48
+        num_observations = 45
 
     class terrain( LeggedRobotCfg.terrain ):
         mesh_type = 'plane'

@@ -216,7 +216,7 @@ class LeggedRobot(BaseTask):
         """ Computes observations
         在平地，每个obs有48个值
         """
-        self.obs_buf = torch.cat((  self.base_lin_vel * self.obs_scales.lin_vel, #3 这个值不能通过传感器直接获得
+        self.obs_buf = torch.cat((  #self.base_lin_vel * self.obs_scales.lin_vel, #3 这个值不能通过传感器直接获得
                                     self.base_ang_vel  * self.obs_scales.ang_vel, #3
                                     self.projected_gravity, #3
                                     self.commands[:, :3] * self.commands_scale, #3 x,y,w三个期望速度
