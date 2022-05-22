@@ -35,7 +35,7 @@ class LionFlatCfg( LeggedRobotCfg ):
         foot_name = "shank"
         penalize_contacts_on = ["thigh","body"]
         terminate_after_contacts_on = ["thigh"]
-        self_collisions = 0 # 1 to disable, 0 to enable...bitwise filter
+        self_collisions = 1 # 1 to disable, 0 to enable...bitwise filter
   
 
     class env( LeggedRobotCfg.env ):
@@ -115,7 +115,7 @@ class LionFlatCfgPPO( LeggedRobotCfgPPO ):
         save_interval = 50 # check for potential saves every this many iterations
         run_name = ''
         # load and resume
-        resume = False
+        resume = True
         load_run = -1 # -1 = last run
         checkpoint = -1 # -1 = last saved model
         resume_path = None # updated from load_run and chkpt
