@@ -33,8 +33,8 @@ class LionFlatCfg( LeggedRobotCfg ):
     class asset( LeggedRobotCfg.asset ):
         file = '{LEGGED_GYM_ROOT_DIR}/resources/robots/lion/urdf/lion.urdf'
         foot_name = "shank"
-        penalize_contacts_on = ["thigh","hip","body"]
-        terminate_after_contacts_on = ["thigh"]
+        penalize_contacts_on = ["thigh","hip","base"]
+        terminate_after_contacts_on = ["base"]
         self_collisions = 1 # 1 to disable, 0 to enable...bitwise filter
   
 
@@ -74,8 +74,8 @@ class LionFlatCfg( LeggedRobotCfg ):
 
     class rewards:
         class scales:   
-            tracking_lin_vel = 1.0 
-            tracking_ang_vel = 0.5
+            tracking_lin_vel = 2.0 
+            tracking_ang_vel = 0.2
             lin_vel_z = -2.0
             ang_vel_xy = -0.05 #上面四个是线速度和角速度的奖励和约束
             termination = -0.0
@@ -120,8 +120,8 @@ class LionFlatCfgPPO( LeggedRobotCfgPPO ):
         resume_path = None # updated from load_run and chkpt
     class policy:
         init_noise_std = 2.0
-        # actor_hidden_dims = [512,256,128]
-        # critic_hidden_dims = [512,256,128]
-        actor_hidden_dims = [256,128,64]
-        critic_hidden_dims = [256,128,64]
+        actor_hidden_dims = [512,256,128]
+        critic_hidden_dims = [512,256,128]
+        # actor_hidden_dims = [256,128,64]
+        # critic_hidden_dims = [256,128,64]
         activation = 'elu' # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid

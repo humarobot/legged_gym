@@ -76,7 +76,7 @@ def play(args):
     img_idx = 0
 
     for i in range(10*int(env.max_episode_length)): #一幕20s，播放10幕结束
-        # obs[:,9:12]=torch.tensor([.5,0,0.2]) #设置期望速度
+        obs[:,6:9]=torch.tensor([.5,0,0.]) #设置期望速度
         # print(obs[1])
         actions=policy(obs.detach())
         obs, _, rews, dones, infos = env.step(actions.detach())
