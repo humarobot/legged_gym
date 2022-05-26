@@ -56,7 +56,7 @@
     <parent link="base_link"/>
     <child link="LegFR_hip"/>
     <axis xyz="1 0 0"/>
-    <limit effort="30" lower="-1" upper="1" velocity="20"/>
+    <limit effort="30" lower="-1" upper="1" velocity="17"/>
   </joint>
   <link name="LegFR_thigh">
     <inertial>
@@ -85,7 +85,7 @@
     <parent link="LegFR_hip"/>
     <child link="LegFR_thigh"/>
     <axis xyz="0 1 0"/>
-    <limit effort="30" lower="-2" upper="2" velocity="20"/>
+    <limit effort="30" lower="-2" upper="2" velocity="17"/>
   </joint>
   <link name="LegFR_shank">
     <inertial>
@@ -114,7 +114,7 @@
     <parent link="LegFR_thigh"/>
     <child link="LegFR_shank"/>
     <axis xyz="0 1 0"/>
-    <limit effort="30" lower="-3" upper="3" velocity="20"/>
+    <limit effort="30" lower="-3" upper="3" velocity="17"/>
   </joint>
   <link name="LegFL_hip">
     <inertial>
@@ -143,7 +143,7 @@
     <parent link="base_link"/>
     <child link="LegFL_hip"/>
     <axis xyz="1 0 0"/>
-    <limit effort="30" lower="-1" upper="1" velocity="20"/>
+    <limit effort="30" lower="-1" upper="1" velocity="17"/>
   </joint>
   <link name="LegFL_thigh">
     <inertial>
@@ -172,7 +172,7 @@
     <parent link="LegFL_hip"/>
     <child link="LegFL_thigh"/>
     <axis xyz="0 -1 0"/>
-    <limit effort="30" lower="-2" upper="2" velocity="20"/>
+    <limit effort="30" lower="-2" upper="2" velocity="17"/>
   </joint>
   <link name="LegFL_shank">
     <inertial>
@@ -201,7 +201,7 @@
     <parent link="LegFL_thigh"/>
     <child link="LegFL_shank"/>
     <axis xyz="0 -1 0"/>
-    <limit effort="30" lower="-3" upper="3" velocity="20"/>
+    <limit effort="30" lower="-3" upper="3" velocity="17"/>
   </joint>
   <link name="LegHR_hip">
     <inertial>
@@ -230,7 +230,7 @@
     <parent link="base_link"/>
     <child link="LegHR_hip"/>
     <axis xyz="-1 0 0"/>
-    <limit effort="30" lower="-1" upper="1" velocity="20"/>
+    <limit effort="30" lower="-1" upper="1" velocity="17"/>
   </joint>
   <link name="LegHR_thigh">
     <inertial>
@@ -259,7 +259,7 @@
     <parent link="LegHR_hip"/>
     <child link="LegHR_thigh"/>
     <axis xyz="0 1 0"/>
-    <limit effort="30" lower="-2" upper="2" velocity="20"/>
+    <limit effort="30" lower="-2" upper="2" velocity="17"/>
   </joint>
   <link name="LegHR_shank">
     <inertial>
@@ -288,7 +288,7 @@
     <parent link="LegHR_thigh"/>
     <child link="LegHR_shank"/>
     <axis xyz="0 1 0"/>
-    <limit effort="30" lower="-3" upper="3" velocity="20"/>
+    <limit effort="30" lower="-3" upper="3" velocity="17"/>
   </joint>
   <link name="LegHL_hip">
     <inertial>
@@ -317,7 +317,7 @@
     <parent link="base_link"/>
     <child link="LegHL_hip"/>
     <axis xyz="-1 0 0"/>
-    <limit effort="30" lower="-1" upper="1" velocity="20"/>
+    <limit effort="30" lower="-1" upper="1" velocity="17"/>
   </joint>
   <link name="LegHL_thigh">
     <inertial>
@@ -346,7 +346,7 @@
     <parent link="LegHL_hip"/>
     <child link="LegHL_thigh"/>
     <axis xyz="0 -1 0"/>
-    <limit effort="30" lower="-2" upper="2" velocity="20"/>
+    <limit effort="30" lower="-2" upper="2" velocity="17"/>
   </joint>
   <link name="LegHL_shank">
     <inertial>
@@ -375,7 +375,7 @@
     <parent link="LegHL_thigh"/>
     <child link="LegHL_shank"/>
     <axis xyz="0 -1 0"/>
-    <limit effort="30" lower="-3" upper="3" velocity="20"/>
+    <limit effort="30" lower="-3" upper="3" velocity="17"/>
   </joint>
 </robot>
 
