@@ -949,16 +949,16 @@ class LeggedRobot(BaseTask):
         # penalize high contact forces
         return torch.sum((torch.norm(self.contact_forces[:, self.feet_indices, :], dim=-1) -  self.cfg.rewards.max_contact_force).clip(min=0.), dim=1)
     
-    def _reward_stand_up(self):
-        # lqk: if body has right orientation, penalize if robot doesn't stand up
-        _stand_up_idx=torch.norm(self.projected_gravity-self.gravity_vec,dim=-1)<1
-        _cost=torch.sum(self._logistic_kernel(self.dof_pos - self.default_dof_pos),dim=-1)
-        # print(_stand_up_idx)
-        return _cost*_stand_up_idx
+    # def _reward_stand_up(self):
+    #     # lqk: if body has right orientation, penalize if robot doesn't stand up
+    #     _stand_up_idx=torch.norm(self.projected_gravity-self.gravity_vec,dim=-1)<1
+    #     _cost=torch.sum(self._logistic_kernel(self.dof_pos - self.default_dof_pos),dim=-1)
+    #     # print(_stand_up_idx)
+    #     return _cost*_stand_up_idx
 
-    def _reward_smoothness(self):
-        # lqk: penalize non-smoothness of dof torques
-        return torch.norm(self.torques-self.old_torques,dim=-1)
+    # def _reward_smoothness(self):
+    #     # lqk: penalize non-smoothness of dof torques
+    #     return torch.norm(self.torques-self.old_torques,dim=-1)
 
     # def _reward_internal_contacts(self):
     #     # lqk: penalize robot internal contacts

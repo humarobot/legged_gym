@@ -72,6 +72,17 @@ class LionFlatCfg( LeggedRobotCfg ):
             default_buffer_size_multiplier = 5
             contact_collection = 2 # 0: never, 1: last sub-step, 2: all sub-steps (default=2)
 
+    class commands:
+        curriculum = False
+        max_curriculum = 1.
+        num_commands = 4 # default: lin_vel_x, lin_vel_y, ang_vel_yaw, heading (in heading mode ang_vel_yaw is recomputed from heading error)
+        resampling_time = 10. # time before command are changed[s]
+        heading_command = True # if true: compute ang vel command from heading error
+        class ranges:
+            lin_vel_x = [-.5, .5] # min max [m/s]
+            lin_vel_y = [-.2, .5]   # min max [m/s]
+            ang_vel_yaw = [-.5, .5]    # min max [rad/s]
+            heading = [-3.14, 3.14]
     class rewards:
         class scales:   
             tracking_lin_vel = 1.0 
@@ -88,7 +99,7 @@ class LionFlatCfg( LeggedRobotCfg ):
             action_rate = -0.01
             collision=-5 #指定的零件发生碰撞就惩罚
             # stand_up = -5
-            smoothness = -0.0025
+            # smoothness = -0.0025
             dof_pos_limits = -10.0
             # internal_contacts = -6 #暂时没有好的方法做内部碰撞检测
 
@@ -97,7 +108,7 @@ class LionFlatCfg( LeggedRobotCfg ):
         soft_dof_pos_limit = 1. # percentage of urdf limits, values above this limit are penalized
         soft_dof_vel_limit = 1.
         soft_torque_limit = 1.
-        base_height_target = 0.5 #1.0
+        base_height_target = 0.6 #1.0
         max_contact_force = 100. # forces above this value are penalized
 
 class LionFlatCfgPPO( LeggedRobotCfgPPO ):
@@ -114,7 +125,7 @@ class LionFlatCfgPPO( LeggedRobotCfgPPO ):
         save_interval = 50 # check for potential saves every this many iterations
         run_name = ''
         # load and resume
-        resume = False
+        resume = True
         load_run = -1 # -1 = last run
         checkpoint = -1 # -1 = last saved model
         resume_path = None # updated from load_run and chkpt
