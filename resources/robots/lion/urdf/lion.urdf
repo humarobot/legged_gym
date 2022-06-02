@@ -44,19 +44,19 @@
         <color rgba="1 1 1 1"/>
       </material>
     </visual>
-    <collision>
+    <!-- <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="../meshes/hip_link.STL"/>
       </geometry>
-    </collision>
+    </collision> -->
   </link>
   <joint name="JointFR_abad" type="revolute">
     <origin rpy="0.0 0.0 0" xyz="0.2467 -0.09 0.0005"/>
     <parent link="base_link"/>
     <child link="LegFR_hip"/>
     <axis xyz="1 0 0"/>
-    <limit effort="30" lower="-1" upper="1" velocity="20"/>
+    <limit effort="30" lower="-1" upper="1" velocity="17"/>
  
   </joint>
   <link name="LegFR_thigh">
@@ -74,19 +74,19 @@
         <color rgba="1 1 1 1"/>
       </material>
     </visual>
-    <collision>
+    <!-- <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="../meshes/thigh_link.STL"/>
       </geometry>
-    </collision>
+    </collision> -->
   </link>
   <joint name="JointFR_hip" type="revolute">
     <origin rpy="0 0.0 0" xyz="0 0 0"/>
     <parent link="LegFR_hip"/>
     <child link="LegFR_thigh"/>
     <axis xyz="0 1 0"/>
-    <limit effort="30" lower="-2" upper="2" velocity="20"/>
+    <limit effort="30" lower="-2" upper="2" velocity="17"/>
 
   </joint>
   <link name="LegFR_shank">
@@ -116,7 +116,7 @@
     <parent link="LegFR_thigh"/>
     <child link="LegFR_shank"/>
     <axis xyz="0 1 0"/>
-    <limit effort="30" lower="-3" upper="3" velocity="20"/>
+    <limit effort="30" lower="-3" upper="3" velocity="17"/>
 
   </joint>
   <link name="LegFL_hip">
@@ -134,19 +134,19 @@
         <color rgba="1 1 1 1"/>
       </material>
     </visual>
-    <collision>
+    <!-- <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="../meshes/hip_link.STL"/>
       </geometry>
-    </collision>
+    </collision> -->
   </link>
   <joint name="JointFL_abad" type="revolute">
     <origin rpy="3.141592653589793 0.0 0" xyz="0.2467 0.09 0.0005"/>
     <parent link="base_link"/>
     <child link="LegFL_hip"/>
     <axis xyz="1 0 0"/>
-    <limit effort="30" lower="-1" upper="1" velocity="20"/>
+    <limit effort="30" lower="-1" upper="1" velocity="17"/>
 
   </joint>
   <link name="LegFL_thigh">
@@ -164,19 +164,19 @@
         <color rgba="1 1 1 1"/>
       </material>
     </visual>
-    <collision>
+    <!-- <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="../meshes/thigh_link.STL"/>
       </geometry>
-    </collision>
+    </collision> -->
   </link>
   <joint name="JointFL_hip" type="revolute">
     <origin rpy="0 3.141592653589793 0" xyz="0 0 0"/>
     <parent link="LegFL_hip"/>
     <child link="LegFL_thigh"/>
     <axis xyz="0 -1 0"/>
-    <limit effort="30" lower="-2" upper="2" velocity="20"/>
+    <limit effort="30" lower="-2" upper="2" velocity="17"/>
 
   </joint>
   <link name="LegFL_shank">
@@ -206,7 +206,7 @@
     <parent link="LegFL_thigh"/>
     <child link="LegFL_shank"/>
     <axis xyz="0 -1 0"/>
-    <limit effort="30" lower="-3" upper="3" velocity="20"/>
+    <limit effort="30" lower="-3" upper="3" velocity="17"/>
 
   </joint>
   <link name="LegHR_hip">
@@ -224,19 +224,19 @@
         <color rgba="1 1 1 1"/>
       </material>
     </visual>
-    <collision>
+    <!-- <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="../meshes/hip_link.STL"/>
       </geometry>
-    </collision>
+    </collision> -->
   </link>
   <joint name="JointHR_abad" type="revolute">
     <origin rpy="0.0 3.141592653589793 0" xyz="-0.2467 -0.09 0.0005"/>
     <parent link="base_link"/>
     <child link="LegHR_hip"/>
     <axis xyz="-1 0 0"/>
-    <limit effort="30" lower="-1" upper="1" velocity="20"/>
+    <limit effort="30" lower="-1" upper="1" velocity="17"/>
 
   </joint>
   <link name="LegHR_thigh">
@@ -254,19 +254,19 @@
         <color rgba="1 1 1 1"/>
       </material>
     </visual>
-    <collision>
+    <!-- <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="../meshes/thigh_link.STL"/>
       </geometry>
-    </collision>
+    </collision> -->
   </link>
   <joint name="JointHR_hip" type="revolute">
     <origin rpy="0 3.141592653589793 0" xyz="0 0 0"/>
     <parent link="LegHR_hip"/>
     <child link="LegHR_thigh"/>
     <axis xyz="0 1 0"/>
-    <limit effort="30" lower="-2" upper="2" velocity="20"/>
+    <limit effort="30" lower="-2" upper="2" velocity="17"/>
 
   </joint>
   <link name="LegHR_shank">
@@ -296,7 +296,7 @@
     <parent link="LegHR_thigh"/>
     <child link="LegHR_shank"/>
     <axis xyz="0 1 0"/>
-    <limit effort="30" lower="-3" upper="3" velocity="20"/>
+    <limit effort="30" lower="-3" upper="3" velocity="17"/>
 
   </joint>
   <link name="LegHL_hip">
@@ -314,19 +314,19 @@
         <color rgba="1 1 1 1"/>
       </material>
     </visual>
-    <collision>
+    <!-- <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="../meshes/hip_link.STL"/>
       </geometry>
-    </collision>
+    </collision> -->
   </link>
   <joint name="JointHL_abad" type="revolute">
     <origin rpy="3.141592653589793 3.141592653589793 0" xyz="-0.2467 0.09 0.0005"/>
     <parent link="base_link"/>
     <child link="LegHL_hip"/>
     <axis xyz="-1 0 0"/>
-    <limit effort="30" lower="-1" upper="1" velocity="20"/>
+    <limit effort="30" lower="-1" upper="1" velocity="17"/>
 
   </joint>
   <link name="LegHL_thigh">
@@ -344,19 +344,19 @@
         <color rgba="1 1 1 1"/>
       </material>
     </visual>
-    <collision>
+    <!-- <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="../meshes/thigh_link.STL"/>
       </geometry>
-    </collision>
+    </collision> -->
   </link>
   <joint name="JointHL_hip" type="revolute">
     <origin rpy="0 6.283185307179586 0" xyz="0 0 0"/>
     <parent link="LegHL_hip"/>
     <child link="LegHL_thigh"/>
     <axis xyz="0 -1 0"/>
-    <limit effort="30" lower="-2" upper="2" velocity="20"/>
+    <limit effort="30" lower="-2" upper="2" velocity="17"/>
 
   </joint>
   <link name="LegHL_shank">
@@ -386,7 +386,7 @@
     <parent link="LegHL_thigh"/>
     <child link="LegHL_shank"/>
     <axis xyz="0 -1 0"/>
-    <limit effort="30" lower="-3" upper="3" velocity="20"/>
+    <limit effort="30" lower="-3" upper="3" velocity="17"/>
 
   </joint>
 </robot>

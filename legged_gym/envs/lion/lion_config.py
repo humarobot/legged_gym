@@ -33,8 +33,8 @@ class LionFlatCfg( LeggedRobotCfg ):
     class asset( LeggedRobotCfg.asset ):
         file = '{LEGGED_GYM_ROOT_DIR}/resources/robots/lion/urdf/lion.urdf'
         foot_name = "shank"
-        penalize_contacts_on = ["thigh","body"]
-        terminate_after_contacts_on = ["thigh"]
+        penalize_contacts_on = ["thigh","base"]
+        terminate_after_contacts_on = ["base"]
         self_collisions = 1 # 1 to disable, 0 to enable...bitwise filter
   
 
@@ -47,8 +47,8 @@ class LionFlatCfg( LeggedRobotCfg ):
         measure_heights = False
     class normalization:
         class obs_scales:
-            lin_vel = 2.0  #实际上机器人无法获得机身线速度
-            ang_vel = .25
+            lin_vel = 1.0  #实际上机器人无法获得机身线速度
+            ang_vel = 1.0
             dof_pos = 1.0
             dof_vel = 0.05
             height_measurements = 5.0
@@ -89,7 +89,7 @@ class LionFlatCfg( LeggedRobotCfg ):
             action_rate = -0.01
             collision=-5 #指定的零件发生碰撞就惩罚
             # stand_up = -5
-            smoothness = -0.0025
+            # smoothness = -0.0025
             # dof_pos_limits = -10.0
             # internal_contacts = -6 #暂时没有好的方法做内部碰撞检测
 
@@ -115,7 +115,7 @@ class LionFlatCfgPPO( LeggedRobotCfgPPO ):
         save_interval = 50 # check for potential saves every this many iterations
         run_name = ''
         # load and resume
-        resume = True
+        resume = False
         load_run = -1 # -1 = last run
         checkpoint = -1 # -1 = last saved model
         resume_path = None # updated from load_run and chkpt
