@@ -9,7 +9,7 @@ class LionFlatCfg( LeggedRobotCfg ):
             'JointHR_abad': 0. ,  # [rad]
             'JointHL_abad': 0.,   # [rad]
 
-            'JointFR_hip': 0.6,     # [rad]
+            'JointFR_hip': 0.6,     # [rad]5
             'JointFL_hip': 0.6,   # [rad]
             'JointHR_hip': 0.6,     # [rad]
             'JointHL_hip': 0.6,   # [rad]
@@ -23,8 +23,8 @@ class LionFlatCfg( LeggedRobotCfg ):
     class control( LeggedRobotCfg.control ):
         # PD Drive parameters:
         control_type = 'P'
-        stiffness = {'Joint': 25.}  # [N*m/rad]
-        damping = {'Joint': 0.5}     # [N*m*s/rad]
+        stiffness = {'Joint': 40.}  # [N*m/rad]
+        damping = {'Joint': 1.}     # [N*m*s/rad]
         # action scale: target angle = actionScale * action + defaultAngle
         action_scale = 0.25
         # decimation: Number of control action updates @ sim DT per policy DT
@@ -33,13 +33,13 @@ class LionFlatCfg( LeggedRobotCfg ):
     class asset( LeggedRobotCfg.asset ):
         file = '{LEGGED_GYM_ROOT_DIR}/resources/robots/lion/urdf/lion.urdf'
         foot_name = "shank"
-        penalize_contacts_on = ["thigh","hip","body"]
+        penalize_contacts_on = ["thigh","hip","base"]
         terminate_after_contacts_on = ["thigh"]
         self_collisions = 1 # 1 to disable, 0 to enable...bitwise filter
   
 
     class env( LeggedRobotCfg.env ):
-        num_observations = 48
+        num_observations = 52
 
     class terrain( LeggedRobotCfg.terrain ):
         mesh_type = 'plane'
@@ -52,7 +52,7 @@ class LionFlatCfg( LeggedRobotCfg ):
             dof_vel = 0.05
             height_measurements = 5.0
         clip_observations = 100.
-        clip_actions = 100.
+        clip_actions = .15
     class sim:
         dt =  0.005
         substeps = 1
@@ -90,8 +90,8 @@ class LionFlatCfg( LeggedRobotCfg ):
             lin_vel_z = -2.0
             ang_vel_xy = -0.05 #上面四个是线速度和角速度的奖励和约束
             termination = -0.0
-            orientation = -5.
-            base_height = -3
+            orientation = -2.
+            base_height = -2.
             torques = -0.00001 #-0.00001
             feet_air_time = 1.0
             # dof_vel = -0.2
@@ -125,14 +125,14 @@ class LionFlatCfgPPO( LeggedRobotCfgPPO ):
         save_interval = 50 # check for potential saves every this many iterations
         run_name = ''
         # load and resume
-        resume = True
+        resume = False
         load_run = -1 # -1 = last run
         checkpoint = -1 # -1 = last saved model
         resume_path = None # updated from load_run and chkpt
     class policy:
-        init_noise_std = 2.0
-        # actor_hidden_dims = [512,256,128]
-        # critic_hidden_dims = [512,256,128]
-        actor_hidden_dims = [256,128,64]
-        critic_hidden_dims = [256,128,64]
+        init_noise_std = .2
+        actor_hidden_dims = [512,256,128]
+        critic_hidden_dims = [512,256,128]
+        # actor_hidden_dims = [256,128,64]
+        # critic_hidden_dims = [256,128,64]
         activation = 'elu' # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid

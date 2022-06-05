@@ -78,30 +78,94 @@ class LeggedRobot(BaseTask):
         self._prepare_reward_function()
         self.init_done = True
 
+        
+
+    
+    def _foot_traj_generator(self,actions):
+        freq = 1.5
+        height = 0.2
+        T = 1.0 / freq
+
+        l1 = 0.119
+        l2 = 0.3
+        l3 = 0.308
+
+        k = 4*((self.init_foot_phase*T + (self.t_now.repeat(1,4))) % T) / T
+        self.legs_phase = k
+        up_buf = (k<1).nonzero(as_tuple=True)
+        down_buf = ((k>=1) & (k<2)).nonzero(as_tuple=True)
+        stance_buf = (k>=2).nonzero(as_tuple=True)
+        self.ref_foot_z[up_buf] = height*(-2*k[up_buf]**3+3*k[up_buf]**2)-0.5
+        self.ref_foot_z[down_buf] = height*(2*k[down_buf]**3-9*k[down_buf]**2+12*k[down_buf]-4)-0.5
+        self.ref_foot_z[stance_buf] = -0.55
+        
+        clip_actions = self.cfg.normalization.clip_actions
+        self.actions = torch.clip(actions, -clip_actions, clip_actions).to(self.device)
+        # print(self.actions[0])
+
+        self.ref_foot_x += self.actions[:,:4]*self.cfg.control.action_scale
+        self.ref_foot_y += self.actions[:,4:8]*self.cfg.control.action_scale
+        self.ref_foot_z += self.actions[:,8:]*self.cfg.control.action_scale
+
+    
+        #逆运动学计算
+        length = torch.sqrt(self.ref_foot_x**2+self.ref_foot_y**2+self.ref_foot_z**2)
+        max = math.sqrt((l2+l3)**2)-0.05
+        min = l1+0.1
+        longer_index = (length > max).nonzero(as_tuple=True) 
+        shorter_index = (length < min).nonzero(as_tuple=True)
+        self.ref_foot_x[longer_index] *= (max/length[longer_index])
+        self.ref_foot_y[longer_index] *= (max/length[longer_index])
+        self.ref_foot_z[longer_index] *= (max/length[longer_index])
+        self.ref_foot_x[shorter_index] *= (min/length[shorter_index])
+        self.ref_foot_y[shorter_index] *= (min/length[shorter_index])
+        self.ref_foot_z[shorter_index] *= (min/length[shorter_index])
+
+        H =torch.sqrt(self.ref_foot_y**2+self.ref_foot_z**2-l1**2)
+        self.ref_actions[:,[3,9]] = torch.atan(l1/H[:,[1,3]])+torch.atan2(self.ref_foot_y[:,[1,3]],-self.ref_foot_z[:,[1,3]])
+        self.ref_actions[:,[0,6]] = torch.atan(H[:,[0,2]]/l1)-torch.atan2(-self.ref_foot_z[:,[0,2]],self.ref_foot_y[:,[0,2]])
+        m1 = (self.ref_foot_x**2+H**2+l2**2-l3**2)/(2*torch.sqrt(self.ref_foot_x**2+H**2)*l2) 
+        self.ref_actions[:,[1,4,7,10]] = torch.atan(-self.ref_foot_x/H)+torch.acos(m1)
+        m2 = (self.ref_foot_x**2+H**2-l2**2-l3**2)/(2*l2*l3)
+        self.ref_actions[:,[2,5,8,11]] = -torch.acos(m2)
+
+        # print(torch.any(torch.isnan(self.ref_actions))) #ref_antions有计算为nan的值
+        # print(''.join('{:<+8.2f}'.format(k) for k in self.ref_actions[0]))
+
+        
+
     def step(self, actions):
         """ Apply actions, simulate, call self.post_physics_step()
 
         Args:
             actions (torch.Tensor): Tensor of shape (num_envs, num_actions_per_env)
         """
-        clip_actions = self.cfg.normalization.clip_actions
-        self.actions = torch.clip(actions, -clip_actions, clip_actions).to(self.device)
+        
+        
+        self._foot_traj_generator(actions)
+        # self.actions = self.ref_actions
+        # self.des_angle = self.ref_actions
+        # print(''.join('{:<+8.2f}'.format(k) for k in self.actions[0]))
         # step physics and render each frame
         
         self.render() 
 
         for _ in range(self.cfg.control.decimation): #每个step进行4步仿真
-            self.torques = self._compute_torques(self.actions).view(self.torques.shape)
+            self.torques = self._compute_torques(self.ref_actions).view(self.torques.shape)
             self.gym.set_dof_actuation_force_tensor(self.sim, gymtorch.unwrap_tensor(self.torques))
             self.gym.simulate(self.sim) #执行一步仿真
             if self.device == 'cpu':
                 self.gym.fetch_results(self.sim, True)
             self.gym.refresh_dof_state_tensor(self.sim)
+        
+        self.t_now += self.dt 
         self.post_physics_step()#-> check_termination()检测是否需要reset；计算回报
         self.old_torques=self.torques
         # return clipped obs, clipped states (None), rewards, dones and infos
         clip_obs = self.cfg.normalization.clip_observations
         self.obs_buf = torch.clip(self.obs_buf, -clip_obs, clip_obs)
+        # print(''.join('{:<8.2f}'.format(x) for x in self.legs_phase[0]))
+
         if self.privileged_obs_buf is not None:
             self.privileged_obs_buf = torch.clip(self.privileged_obs_buf, -clip_obs, clip_obs)
         return self.obs_buf, self.privileged_obs_buf, self.rew_buf, self.reset_buf, self.extras
@@ -145,6 +209,7 @@ class LeggedRobot(BaseTask):
         self.reset_buf = torch.any(torch.norm(self.contact_forces[:, self.termination_contact_indices, :], dim=-1) > 1., dim=1)
         self.time_out_buf = self.episode_length_buf > self.max_episode_length # no terminal reward for time-outs
         self.reset_buf |= self.time_out_buf
+
         # self.reset_buf = self.time_out_buf
 
     def reset_idx(self, env_ids): #post_physics_step调用
@@ -179,6 +244,7 @@ class LeggedRobot(BaseTask):
         self.feet_air_time[env_ids] = 0.
         self.episode_length_buf[env_ids] = 0
         self.reset_buf[env_ids] = 1
+        self.t_now[env_ids] = 0.
         # fill extras
         self.extras["episode"] = {}
         for key in self.episode_sums.keys():
@@ -222,7 +288,8 @@ class LeggedRobot(BaseTask):
                                     self.commands[:, :3] * self.commands_scale, #3 x,y,w三个期望速度
                                     (self.dof_pos - self.default_dof_pos) * self.obs_scales.dof_pos, #12关节位置
                                     self.dof_vel * self.obs_scales.dof_vel, #12关节速度
-                                    self.actions #12关节动作
+                                    self.actions, #12关节动作
+                                    self.legs_phase
                                     ),dim=-1)
         # add perceptive inputs if not blind
         if self.cfg.terrain.measure_heights:
@@ -369,10 +436,10 @@ class LeggedRobot(BaseTask):
             [torch.Tensor]: Torques sent to the simulation
         """
         #pd controller
-        actions_scaled = actions * self.cfg.control.action_scale
+        actions_scaled = actions #* self.cfg.control.action_scale
         control_type = self.cfg.control.control_type
         if control_type=="P":
-            torques = self.p_gains*(actions_scaled + self.default_dof_pos - self.dof_pos) - self.d_gains*self.dof_vel
+            torques = self.p_gains*(actions_scaled  - self.dof_pos) - self.d_gains*self.dof_vel
         elif control_type=="V":
             torques = self.p_gains*(actions_scaled - self.dof_vel) - self.d_gains*(self.dof_vel - self.last_dof_vel)/self.sim_params.dt
         elif control_type=="T":
@@ -545,11 +612,24 @@ class LeggedRobot(BaseTask):
         self.noise_scale_vec = self._get_noise_scale_vec(self.cfg)
         self.gravity_vec = to_torch(get_axis_params(-1., self.up_axis_idx), device=self.device).repeat((self.num_envs, 1))
         self.forward_vec = to_torch([1., 0., 0.], device=self.device).repeat((self.num_envs, 1))
+        self.t_now = torch.zeros(self.num_envs, 1 ,dtype=torch.float, device=self.device, requires_grad=False)
         self.torques = torch.zeros(self.num_envs, self.num_actions, dtype=torch.float, device=self.device, requires_grad=False)
         self.old_torques = torch.zeros(self.num_envs, self.num_actions, dtype=torch.float, device=self.device, requires_grad=False)
         self.p_gains = torch.zeros(self.num_actions, dtype=torch.float, device=self.device, requires_grad=False)
         self.d_gains = torch.zeros(self.num_actions, dtype=torch.float, device=self.device, requires_grad=False)
         self.actions = torch.zeros(self.num_envs, self.num_actions, dtype=torch.float, device=self.device, requires_grad=False)
+        # self.ref_foot_pos = torch.zeros(self.num_envs, self.num_actions, dtype=torch.float, device=self.device, requires_grad=False)
+        self.ref_foot_x = torch.zeros(self.num_envs, 4, dtype=torch.float, device=self.device, requires_grad=False)
+        self.ref_foot_x += -0.08
+        self.ref_foot_y = torch.zeros(self.num_envs, 4, dtype=torch.float, device=self.device, requires_grad=False)
+        self.ref_foot_y[:,[1,3]] = -0.119
+        self.ref_foot_y[:,[0,2]] = 0.119
+        self.ref_foot_z = torch.zeros(self.num_envs, 4, dtype=torch.float, device=self.device, requires_grad=False)
+        self.init_foot_phase = torch.zeros(self.num_envs, 4, dtype=torch.float, device=self.device, requires_grad=False)
+        self.init_foot_phase[:,[1,2]] = 0.5
+        self.ref_actions = torch.zeros(self.num_envs, self.num_actions, dtype=torch.float, device=self.device, requires_grad=False)
+        self.legs_phase = torch.zeros(self.num_envs, 4, dtype=torch.float, device=self.device, requires_grad=False)
+        # self.des_angle = torch.zeros(self.num_envs, self.num_actions, dtype=torch.float, device=self.device, requires_grad=False)
         self.last_actions = torch.zeros(self.num_envs, self.num_actions, dtype=torch.float, device=self.device, requires_grad=False)
         self.last_dof_vel = torch.zeros_like(self.dof_vel)
         self.last_root_vel = torch.zeros_like(self.root_states[:, 7:13])
