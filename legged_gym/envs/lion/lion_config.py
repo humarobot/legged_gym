@@ -34,12 +34,12 @@ class LionFlatCfg( LeggedRobotCfg ):
         file = '{LEGGED_GYM_ROOT_DIR}/resources/robots/lion/urdf/lion.urdf'
         foot_name = "shank"
         penalize_contacts_on = ["thigh","hip","base"]
-        terminate_after_contacts_on = ["thigh"]
+        terminate_after_contacts_on = ["base"]
         self_collisions = 1 # 1 to disable, 0 to enable...bitwise filter
   
 
     class env( LeggedRobotCfg.env ):
-        num_observations = 52
+        num_observations = 76
 
     class terrain( LeggedRobotCfg.terrain ):
         mesh_type = 'plane'
@@ -52,7 +52,7 @@ class LionFlatCfg( LeggedRobotCfg ):
             dof_vel = 0.05
             height_measurements = 5.0
         clip_observations = 100.
-        clip_actions = .15
+        clip_actions = 100.
     class sim:
         dt =  0.005
         substeps = 1
@@ -79,8 +79,8 @@ class LionFlatCfg( LeggedRobotCfg ):
         resampling_time = 10. # time before command are changed[s]
         heading_command = True # if true: compute ang vel command from heading error
         class ranges:
-            lin_vel_x = [-.5, .5] # min max [m/s]
-            lin_vel_y = [-.2, .5]   # min max [m/s]
+            lin_vel_x = [-.6, .3] # min max [m/s]
+            lin_vel_y = [-.3, .3]   # min max [m/s]
             ang_vel_yaw = [-.5, .5]    # min max [rad/s]
             heading = [-3.14, 3.14]
     class rewards:
@@ -89,7 +89,7 @@ class LionFlatCfg( LeggedRobotCfg ):
             tracking_ang_vel = 0.5
             lin_vel_z = -2.0
             ang_vel_xy = -0.05 #上面四个是线速度和角速度的奖励和约束
-            termination = -0.0
+            termination = -30.0
             orientation = -2.
             base_height = -2.
             torques = -0.00001 #-0.00001
@@ -97,13 +97,15 @@ class LionFlatCfg( LeggedRobotCfg ):
             # dof_vel = -0.2
             dof_acc = -2.5e-7
             action_rate = -0.01
-            collision=-5 #指定的零件发生碰撞就惩罚
+            collision = -5. #指定的零件发生碰撞就惩罚
+            imitation = -25.
             # stand_up = -5
             # smoothness = -0.0025
             dof_pos_limits = -10.0
             # internal_contacts = -6 #暂时没有好的方法做内部碰撞检测
 
         only_positive_rewards = False  # if true negative total rewards are clipped at zero (avoids early termination problems)
+        imit_sigma = 0.25
         tracking_sigma = 0.25 # tracking reward = exp(-error^2/sigma)
         soft_dof_pos_limit = 1. # percentage of urdf limits, values above this limit are penalized
         soft_dof_vel_limit = 1.
@@ -130,7 +132,7 @@ class LionFlatCfgPPO( LeggedRobotCfgPPO ):
         checkpoint = -1 # -1 = last saved model
         resume_path = None # updated from load_run and chkpt
     class policy:
-        init_noise_std = .2
+        init_noise_std = 1.
         actor_hidden_dims = [512,256,128]
         critic_hidden_dims = [512,256,128]
         # actor_hidden_dims = [256,128,64]
