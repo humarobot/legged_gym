@@ -282,7 +282,7 @@ class LeggedRobot(BaseTask):
         """ Computes observations
         在平地，每个obs有48个值
         """
-        self.obs_buf = torch.cat((  self.base_lin_vel * self.obs_scales.lin_vel, #3 这个值不能通过传感器直接获得
+        self.obs_buf = torch.cat((  self.base_lin_vel * self.obs_scales.lin_vel + 0.5*(torch.rand((self.num_envs,3),device='cuda') - 0.5), #3 这个值不能通过传感器直接获得
                                     self.base_ang_vel  * self.obs_scales.ang_vel, #3
                                     self.projected_gravity, #3
                                     self.commands[:, :3] * self.commands_scale, #3 x,y,w三个期望速度
@@ -628,8 +628,8 @@ class LeggedRobot(BaseTask):
         self.ref_foot_x = torch.zeros(self.num_envs, 4, dtype=torch.float, device=self.device, requires_grad=False)
         self.ref_foot_x += -0.03
         self.ref_foot_y = torch.zeros(self.num_envs, 4, dtype=torch.float, device=self.device, requires_grad=False)
-        self.ref_foot_y[:,[1,3]] = -0.1
-        self.ref_foot_y[:,[0,2]] = 0.1
+        self.ref_foot_y[:,[1,3]] = -0.05
+        self.ref_foot_y[:,[0,2]] = 0.05
         self.ref_foot_z = torch.zeros(self.num_envs, 4, dtype=torch.float, device=self.device, requires_grad=False)
         self.init_foot_phase = torch.zeros(self.num_envs, 4, dtype=torch.float, device=self.device, requires_grad=False)
         self.init_foot_phase[:,[1,2]] = 0.5

@@ -23,7 +23,7 @@ class LionFlatCfg( LeggedRobotCfg ):
     class control( LeggedRobotCfg.control ):
         # PD Drive parameters:
         control_type = 'P'
-        stiffness = {'Joint': 40.}  # [N*m/rad]
+        stiffness = {'Joint': 30.}  # [N*m/rad]
         damping = {'Joint': 1.}     # [N*m*s/rad]
         # action scale: target angle = actionScale * action + defaultAngle
         action_scale = 0.25
@@ -79,10 +79,11 @@ class LionFlatCfg( LeggedRobotCfg ):
         resampling_time = 10. # time before command are changed[s]
         heading_command = True # if true: compute ang vel command from heading error
         class ranges:
-            lin_vel_x = [-.6, .3] # min max [m/s]
+            lin_vel_x = [-1.1, 1.1] # min max [m/s]
             lin_vel_y = [-.3, .3]   # min max [m/s]
-            ang_vel_yaw = [-.5, .5]    # min max [rad/s]
+            ang_vel_yaw = [-.6, .6]    # min max [rad/s]
             heading = [-3.14, 3.14]
+
     class rewards:
         class scales:   
             tracking_lin_vel = 1.0 
@@ -98,7 +99,8 @@ class LionFlatCfg( LeggedRobotCfg ):
             dof_acc = -2.5e-7
             action_rate = -0.01
             collision = -5. #指定的零件发生碰撞就惩罚
-            imitation = -25.
+            imitation = -15.
+            feet_contact_forces = -0.01
             # stand_up = -5
             # smoothness = -0.0025
             dof_pos_limits = -10.0
@@ -127,7 +129,7 @@ class LionFlatCfgPPO( LeggedRobotCfgPPO ):
         save_interval = 50 # check for potential saves every this many iterations
         run_name = ''
         # load and resume
-        resume = False
+        resume = True
         load_run = -1 # -1 = last run
         checkpoint = -1 # -1 = last saved model
         resume_path = None # updated from load_run and chkpt
